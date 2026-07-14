@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{{ ds.label }} — Qodebook{% endblock %}
+
+{% block content %}
+<div data-tree-root="{{ name }}">
+
+  <!-- The header spans the page: the pitch on the left, the census on the right,
+       so the level ramp is explained by real counts instead of a bare legend. -->
+  <header class="page-head">
+    <div>
+      <p class="eyebrow">{{ tagline }}</p>
+      <h1 class="page-title">{{ ds.label }} <small>v.{{ ds.version }}</small></h1>
+      <p class="page-sub">{{ blurb }}</p>
+
+      <div class="find mt-5 max-w-[520px]">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/></svg>
+        <input type="search" id="tree-search" class="field" autocomplete="off"
+          placeholder="{{ t['search_ph'].format(total='{:,}'.format(total)) }}">
+      </div>
+    </div>
+
+    <div class="census">
+      <p class="sheet-title">{{ t['by_level'] }}</p>
+      <ol class="census-list">
+        {% for i in range(5) %}
+        <li>
+          <span class="lvl" data-level="{{ i }}">{{ level_name(name, i) }}</span>
+          <span class="census-bar" aria-hidden="true">
+            <span style="width: {{ (counts.get(i, 0) / total * 100) | round(2) }}%"></span>
+          </span>
+          <span class="census-num">{{ "{:,}".format(counts.get(i, 0)) }}</span>
+        </li>
+        {% endfor %}
+      </ol>
+      <p class="census-foot">{{ t['broad'] }} → {{ t['specific'] }}</p>
+    </div>
+  </header>
+
+  <!-- Results take over while a query is active; the tree waits underneath. -->
+  <section id="search-results" class="hidden mt-6">
+    <div class="sheet">
+      <div class="sheet-head">
+        <h2 class="sheet-title">{{ t['matches'] }}</h2>
+        <span class="sheet-note" id="search-count" aria-live="polite"></span>
+      </div>
+      <div id="search-list"></div>
+    </div>
+  </section>
+
+  <section id="tree-section" class="mt-6">
+    <p class="sheet-title mb-2">{{ t['hierarchy'] }}</p>
+    <div class="sheet">
+      <div class="sheet-body">
+        <ul class="tree" role="tree">
+          {% for row in roots %}
+          <li role="treeitem" {% if row.has_children %}aria-expanded="false"{% endif %} data-code="{{ row.code }}">
+            <div class="tree-row">
+              {% if row.has_children %}
+              <button type="button" class="tree-toggle" aria-label="{{ row.code }}">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </button>
+              {% else %}
+              <span class="tree-gap"></span>
+              {% endif %}
+              <a href="/browse/{{ name }}/{{ row.code }}" class="tree-link">
+                <span class="code">{{ row.code }}</span>
+                <span class="tree-name">{{ row.title }}</span>
+                <span class="lvl" data-level="{{ row.level }}">{{ level_name(name, row.level) }}</span>
+              </a>
+            </div>
+            <ul class="hidden" role="group"></ul>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

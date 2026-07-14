@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block title %}{{ node.code }} {{ node.title }} — Qodebook{% endblock %}
+
+{# One row: code (with dim trailing zeros), title, level chip. Level names always
+   come from level_name(), never from the database's mixed-language category. #}
+{% macro row(target, item) %}
+{% set head, tail = code_split(target, item.code, item.level) %}
+<a href="/browse/{{ target }}/{{ item.code }}" class="row" data-tax="{{ target }}" data-list-item>
+  <span class="code">{{ head }}<span class="code-dim">{{ tail }}</span></span>
+  <span class="row-title">{{ item.title }}</span>
+  <span class="lvl" data-level="{{ item.level }}">{{ level_name(target, item.level) }}</span>
+</a>
+{% endmacro %}
+
+{% block content %}
+<nav class="crumbs" aria-label="Breadcrumb">
+  <a href="/browse/{{ name }}">{{ ds.label }}</a>
+  {% for a in ancestors %}
+  <span class="sep">/</span>
+  <a href="/browse/{{ name }}/{{ a.code }}" title="{{ a.title }}">{{ a.code }}</a>
+  {% endfor %}
+  <span class="sep">/</span>
+  <span>{{ node.code }}</span>
+</nav>
+
+<!-- The code, read as a position. Each slot is one level; unfilled slots are
+     levels this code does not reach. The facts on the right carry the numbers, so
+     the headline stays a headline. -->
+<header class="hero">
+  <div class="hero-main">
+    <div class="ruler" role="img" aria-label="{{ node.code }} — {{ level_name(name, node.level) }}">
+      {% for slot in slots %}
+      <div class="slot" data-filled="{{ 'true' if slot.filled else 'false' }}" data-current="{{ 'true' if slot.current else 'false' }}">
+        <span class="slot-digits">{{ slot.digits }}</span>
+        <span class="slot-tick">{{ level_name(name, slot.level) }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <h1 class="page-title hero-title">{{ node.title }}</h1>
+    <p class="hero-meta">
+      <span class="lvl" data-level="{{ node.level }}">{{ level_name(name, node.level) }}</span>
+      <span>
+        {% if children %}{{ t['n_below'].format(n=children|length, level=level_plural(name, node.level + 1)) }}{% else %}{{ t['leaf'] }}{% endif %},
+        {{ t['n_links'].format(n=mappings['items']|length, s='' if mappings['items']|length == 1 else 's', label=peer.label) }}
+      </span>
+    </p>
+  </div>
+
+  <dl class="facts">
+    <div>
+      <dt>{{ t['facts_level'] }}</dt>
+      <dd>{{ level_name(name, node.level) }}</dd>
+    </div>
+    <div>
+      <dt>{{ t['facts_parent'] }}</dt>
+      <dd>
+        {% if node.parent_code %}
+        <a href="/browse/{{ name }}/{{ node.parent_code }}" class="code">{{ node.parent_code }}</a>
+        {% else %}<span class="facts-none">{{ t['none_dash'] }}</span>{% endif %}
+      </dd>
+    </div>
+    <div>
+      <dt>{{ t['facts_below'] }}</dt>
+      <dd class="facts-num">{{ children|length }}</dd>
+    </div>
+    <div>
+      <dt>{{ t['facts_links'] }} · {{ peer.label }}</dt>
+      <dd class="facts-num">{{ mappings['items']|length }}</dd>
+    </div>
+  </dl>
+</header>
+
+<div class="mt-[18px] grid grid-cols-1 gap-[18px] lg:grid-cols-[minmax(0,1fr)_340px]">
+
+  <div class="min-w-0">
+    <!-- Definition -->
+    <section class="sheet">
+      <div class="sheet-head">
+        <h2 class="sheet-title">{{ t['definition'] }}</h2>
+        <span class="sheet-note">{{ ds.label }} {{ node.code }}</span>
+      </div>
+      <div class="sheet-body">
+        {% if definition %}
+        <p class="prose" data-clamp>{{ definition }}</p>
+        {% else %}
+        <p class="prose-empty">{{ t['no_definition'] }}</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- Same parent -->
+    <section class="sheet">
+      <div class="sheet-head">
+        <h2 class="sheet-title">{{ t['same_parent'] }}</h2>
+        <span class="sheet-note">
+          {% if node.parent_code %}{{ t['under'].format(code=node.parent_code) }} · {{ siblings|length }}{% else %}{{ t['top_of_hierarchy'] }}{% endif %}
+        </span>
+      </div>
+      {% if siblings %}
+      <div data-list data-list-noun="{{ level_plural(name, node.level) }}">
+        {% for item in siblings %}
+          {% if item.code == node.code %}
+          {% set head, tail = code_split(name, item.code, item.level) %}
+          <span class="row row-here" data-list-item data-list-current>
+            <span class="code">{{ head }}<span class="code-dim">{{ tail }}</span></span>
+            <span class="row-title">{{ item.title }}</span>
+            <span class="here">{{ t['you_are_here'] }}</span>
+          </span>
+          {% else %}
+            {{ row(name, item) }}
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="row-empty">{{ t['no_siblings'] }}</p>
+      {% endif %}
+    </section>
+
+    <!-- The bridge: the other taxonomy. data-tax flips every colour inside. -->
+    <section class="sheet sheet-cross" data-tax="{{ peer_name }}">
+      <div class="sheet-head">
+        <h2 class="sheet-title">{{ mapping_heading }}</h2>
+        <span class="sheet-note">{{ peer.label }} · {{ mappings['items']|length }}</span>
+      </div>
+      {% if mappings['note'] %}
+      <p class="sheet-body" style="padding-bottom: 0; font-size: 13px; color: var(--text-3);">{{ mappings['note'] }}.</p>
+      {% endif %}
+      {% if mappings['items'] %}
+      <div data-list data-list-noun="{{ t['links'] }}">
+        {% for item in mappings['items'] %}{{ row(peer_name, item) }}{% endfor %}
+      </div>
+      {% else %}
+      <p class="row-empty">{{ t['no_link'].format(label=peer.label) }}</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <!-- Position rail -->
+  <aside>
+    <section class="sheet lg:sticky lg:top-[76px]">
+      <div class="sheet-head">
+        <h2 class="sheet-title">{{ t['position'] }}</h2>
+      </div>
+      <div class="sheet-body">
+        <ol class="rail" data-collapse>
+          {% for a in ancestors %}
+          {% set head, tail = code_split(name, a.code, a.level) %}
+          <li class="rail-item">
+            <a href="/browse/{{ name }}/{{ a.code }}" class="rail-link">
+              <span class="rail-code">
+                <span class="code">{{ head }}<span class="code-dim">{{ tail }}</span></span>
+                <span class="lvl" data-level="{{ a.level }}">{{ level_name(name, a.level) }}</span>
+              </span>
+              <span class="rail-name">{{ a.title }}</span>
+            </a>
+          </li>
+          {% endfor %}
+
+          {% set head, tail = code_split(name, node.code, node.level) %}
+          <li class="rail-item" data-current>
+            <span class="rail-code">
+              <span class="code">{{ head }}<span class="code-dim">{{ tail }}</span></span>
+              <span class="here">{{ t['you_are_here'] }}</span>
+            </span>
+            <span class="rail-name">{{ node.title }}</span>
+          </li>
+
+          {% if children %}
+          <li class="rail-group">{{ t['n_below'].format(n=children|length, level=level_plural(name, node.level + 1)) }}</li>
+          {% for c in children %}
+          {% set head, tail = code_split(name, c.code, c.level) %}
+          <li class="rail-item" data-collapse-item>
+            <a href="/browse/{{ name }}/{{ c.code }}" class="rail-link">
+              <span class="rail-code">
+                <span class="code">{{ head }}<span class="code-dim">{{ tail }}</span></span>
+              </span>
+              <span class="rail-name">{{ c.title }}</span>
+            </a>
+          </li>
+          {% endfor %}
+          {% endif %}
+        </ol>
+      </div>
+    </section>
+  </aside>
+</div>
+<p class="caveat">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8.5v4.2M12 16.2h.01M10.6 3.9L2.6 18a1.6 1.6 0 001.4 2.4h16a1.6 1.6 0 001.4-2.4l-8-14.1a1.6 1.6 0 00-2.8 0z"/>
+    </svg>
+    <span>
+      <b>{{ t['warning'] }}</b>
+      <br>
+      {{ t['bridge_caveat'] }}
+    </span>
+  </p>
+{% endblock %}

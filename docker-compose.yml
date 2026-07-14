@@ -1,0 +1,16 @@
+services:
+  qodebook:
+    build: .
+    image: qodebook:latest
+    container_name: qodebook
+    environment:
+      PORT: ${PORT:-8000}
+      SQLITE_PATH: data/database.sqlite
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"
+    volumes:
+      - qodebook_data:/app/data/
+    restart: unless-stopped
+
+volumes:
+  qodebook_data:

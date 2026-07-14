@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Qodebook — UNSPSC · KBLI{% endblock %}
+
+{% block content %}
+<div class="home">
+  <header class="home-head">
+    <p class="eyebrow" style="color: var(--text-3);">{{ t['home_eyebrow'] }}</p>
+    <h1 class="page-title home-title">{{ t['home_title'] }}</h1>
+    <p class="page-sub">{{ t['home_sub'] }}</p>
+  </header>
+
+  <div class="grid grid-cols-1 gap-[18px] md:grid-cols-2">
+    {% for card in cards %}
+    <a href="/browse/{{ card.name }}" class="gate" data-tax="{{ card.name }}">
+      <p class="eyebrow">{{ card.tagline }}</p>
+      <p class="gate-name">{{ card.label }} <small>v.{{ card.version }}</small></p>
+      <p class="gate-line">{{ card.blurb }}</p>
+
+      <!-- A worked example: a real code, read slot by slot. The unfilled slot on
+           the UNSPSC side is the point — `00` means that level is not specified. -->
+      <div class="gate-specimen">
+        <div class="ruler">
+          {% for slot in code_slots(card.name, card.specimen, card.specimen_level) %}
+          <div class="slot" data-filled="{{ 'true' if slot.filled else 'false' }}" data-current="{{ 'true' if slot.current else 'false' }}">
+            <span class="slot-digits">{{ slot.digits }}</span>
+            <span class="slot-tick">{{ level_name(card.name, slot.level) }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="gate-foot">
+        <span class="gate-count">{{ "{:,}".format(card.total) }}<span>{{ t['codes'] }}</span></span>
+        <span class="gate-go">{{ t['browse'] }} →</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  <section class="bridge">
+    <div>
+      <p class="sheet-title">{{ t['bridge_title'] }}</p>
+      <ol class="list-decimal pl-5">
+        {% for bridge in t['bridge_body'] %}
+          <li class="gate-line">
+            {{ bridge.format(pairs="{:,}".format(pairs)) }}
+          </li>
+        {% endfor %}
+      </ol>
+    </div>
+    <div class="bridge-demo">
+      <span data-tax="kbli"><span class="code">01111</span> <span class="lvl" data-level="4">{{ level_name('kbli', 4) }}</span></span>
+      <span class="bridge-x">{{ t['links_to'] }}</span>
+      <span data-tax="unspsc"><span class="code">1015<span class="code-dim">0000</span></span> <span class="lvl" data-level="2">{{ level_name('unspsc', 2) }}</span></span>
+      <a href="/browse/kbli/01111" class="gate-go">{{ t['see_it'] }} →</a>
+    </div>
+  </section>
+
+  <!-- The links are model-generated, so the page says so plainly rather than
+       letting them pass as an official mapping. -->
+  <p class="caveat">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8.5v4.2M12 16.2h.01M10.6 3.9L2.6 18a1.6 1.6 0 001.4 2.4h16a1.6 1.6 0 001.4-2.4l-8-14.1a1.6 1.6 0 00-2.8 0z"/>
+    </svg>
+    <span>
+      <b>{{ t['warning'] }}</b>
+      <br>
+      {{ t['bridge_caveat'] }}
+    </span>
+  </p>
+</div>
+{% endblock %}

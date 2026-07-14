@@ -1,0 +1,31 @@
+# Secrets never enter the image. The app runs on defaults without a .env.
+.env
+
+# The mapper is not part of the served image — it writes, the reader does not.
+process/
+
+# The dumps are a rebuild path, not a runtime need, and dump_master_unspsc.sql
+# alone is 66 MB of build context nobody in the container will ever read.
+data/dump_*.sql
+data/*.sqlite-journal
+data/*.sqlite-wal
+data/*.sqlite-shm
+
+.git
+.gitignore
+.gitattributes
+.venv
+venv/
+env/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+.claude/
+*.md
+Dockerfile
+docker-compose.yml
+.dockerignore

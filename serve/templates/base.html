@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Qodebook{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'&gt;&lt;rect width='32' height='32' fill='%23005db5'/&gt;&lt;rect y='24' width='32' height='8' fill='%239b1c31'/&gt;&lt;/svg&gt;">
+
+  <script>
+    (function () {
+      const t = localStorage.getItem("qodebook-theme");
+      if (t === "dark" || (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        document.documentElement.classList.add("dark");
+      }
+    })();
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Tailwind carries layout only. Every colour and typeface lives in style.css,
+    // so the two taxonomy hues and dark mode are each defined in exactly one place.
+    tailwind.config = { darkMode: "class" };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}?v=10">
+
+  <!-- The client renders tree rows and list controls, so it needs the same level
+       names and strings the server used. One language, one source. -->
+  <script>
+    window.LEVELS = {{ js_levels | tojson }};
+    window.T = {{ js_strings | tojson }};
+  </script>
+</head>
+<body class="app" {% if name %}data-tax="{{ name }}"{% endif %}>
+
+  <header class="masthead">
+    <div class="masthead-inner">
+      <a href="/" class="wordmark">
+        <span class="wordmark-mark" aria-hidden="true"></span>
+        <span>
+          <span class="wordmark-name">Qodebook</span>
+          <span class="wordmark-sub">Right Code · Any Purpose</span>
+        </span>
+      </a>
+
+      <nav class="masthead-nav" aria-label="Sections">
+        <a href="/browse/unspsc" class="tab" data-tax="unspsc" {% if name == 'unspsc' %}aria-current="page"{% endif %}>UNSPSC</a>
+        <a href="/browse/kbli" class="tab" data-tax="kbli" {% if name == 'kbli' %}aria-current="page"{% endif %}>KBLI</a>
+        <button type="button" class="tab" id="download-open" aria-haspopup="dialog" aria-controls="download-modal">{{ t['download'] }}</button>
+
+        <span class="lang" role="group" aria-label="Language">
+          {% for code in langs %}
+          <a href="/lang/{{ code }}" class="lang-opt" {% if code == lang %}aria-current="true"{% endif %}
+             title="{{ t['lang_name'] }}">{{ code | upper }}</a>
+          {% endfor %}
+        </span>
+
+        <button type="button" id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">
+          <svg class="icon-sun" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path stroke-linecap="round" d="M12 2.6v2.1m0 16.6v-2.1M4.4 4.4l1.5 1.5m12.2 12.2l1.5 1.5M2.6 12h2.1m14.6 0h2.1M4.4 19.6l1.5-1.5M17.6 6.4l1.5-1.5"/></svg>
+          <svg class="icon-moon" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="colophon">
+    <div class="colophon-inner justify-center lg:justify-between">
+      <span>
+        <div class="flex items-center gap-2.5">
+          <span class="font-medium text-gray-600 dark:text-gray-300 flex gap-2.5 items-center justify-center">
+            <span class="flex h-8 w-8 items-center justify-center rounded bg-white dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white">
+              <svg width="16" height="16" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.8195 5.14446L14.3459 1.5103L0.135338 16.3773L3.60902 20.0115L17.8195 5.14446Z" fill="currentColor"></path>
+                <path d="M16.9173 7.12672L19.4211 4.5073L17.8421 2.85541L20.5714 0L24 3.58696L18.7669 9.06179L16.9173 7.12672Z" fill="currentColor"></path>
+                <path d="M23.8647 16.3773L16.1504 8.30665L14.3459 10.0057L19.4211 15.3154L17.8421 16.9673L20.5714 19.8227L23.8647 16.3773Z" fill="currentColor"></path>
+                <path d="M14.5489 18.336L17.6391 15.103L13.6692 10.9497L10.5789 14.1827L14.5489 18.336Z" fill="currentColor"></path>
+                <path d="M10.9624 16.5189L9.60902 15.103L7.91729 16.9673L9.22556 18.336L10.9624 16.5189Z" fill="currentColor"></path>
+                <path d="M5.23308 9.06179L0 3.58696L3.09023 0.44837L8.2782 5.87601L5.23308 9.06179Z" fill="currentColor"></path>
+                <path d="M9.22556 4.64889L7.48872 2.83181L9.22556 1.06193L10.9398 2.85541L9.22556 4.64889Z" fill="currentColor"></path>
+                <path d="M16.9173 7.12672L19.4211 4.5073L17.8421 2.85541L20.5714 0L24 3.58696L18.7669 9.06179L16.9173 7.12672Z" fill="currentColor"></path>
+                <path d="M23.8647 16.3773L16.1504 8.30665L14.3459 10.0057L19.4211 15.3154L17.8421 16.9673L20.5714 19.8227L23.8647 16.3773Z" fill="currentColor"></path>
+                <path d="M10.9624 16.5189L9.60902 15.103L7.91729 16.9673L9.22556 18.336L10.9624 16.5189Z" fill="currentColor"></path>
+                <path d="M9.22556 4.64889L7.48872 2.83181L9.22556 1.06193L10.9398 2.85541L9.22556 4.64889Z" fill="currentColor"></path>
+              </svg>
+            </span>
+            xxdev.id
+          </span>
+          <span class="text-gray-300 dark:text-gray-600">·</span>
+          <span>Qodebook</span>
+        </div>
+      </span>
+      <span class="colophon-meta">158,473 UNSPSC · 2,444 KBLI · 5,236 {{ t['links'].capitalize() }}</span>
+    </div>
+  </footer>
+
+  <!-- The download popup. Every page carries it, so the data is one click away
+       from wherever you are. The href is the real file, so the link works on its
+       own; app.js intercepts it only to spin the button while the file is built. -->
+  <div class="modal hidden" id="download-modal" role="dialog" aria-modal="true" aria-labelledby="download-title">
+    <div class="modal-veil" data-close-modal></div>
+
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="download-title">{{ t['download_title'] }}</h2>
+          <p class="modal-sub">{{ t['download_sub'] }}</p>
+        </div>
+        <button type="button" class="icon-btn" data-close-modal aria-label="{{ t['download_close'] }}">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+
+      <ul class="dl-list">
+        {% for key, spec in downloads.items() %}
+        <li class="dl-row" {% if key != 'mapping' %}data-tax="{{ key }}"{% endif %}>
+          <div class="dl-info">
+            <p class="dl-head">
+              <span class="dl-name">{{ t['mapping'] if key == 'mapping' else spec['sheet'] }}</span>
+              <span class="dl-count">{{ t['download_rows'].format(n='{:,}'.format(download_counts[key])) }}</span>
+            </p>
+            <p class="dl-desc">{{ t['download_' ~ key] }}</p>
+            <p class="dl-error hidden" role="alert"></p>
+          </div>
+          <div class="dl-acts">
+            <a class="btn" href="/download/{{ key }}.csv" download="{{ spec['stem'] }}.csv">CSV</a>
+            <a class="btn btn-solid" href="/download/{{ key }}.xlsx" download="{{ spec['stem'] }}.xlsx">XLSX</a>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', path='js/app.js') }}?v=10"></script>
+</body>
+</html>
