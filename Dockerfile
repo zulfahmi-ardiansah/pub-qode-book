@@ -32,4 +32,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 
 # Shell form, so ${PORT} is expanded by the shell at start-up rather than frozen
 # into the image at build time.
-CMD ["sh", "-c", "exec uvicorn serve.app:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "exec uvicorn serve.app:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]
