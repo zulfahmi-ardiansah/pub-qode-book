@@ -100,6 +100,8 @@
 .wordmark-sub { display: block; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--text-3); }
 
 .masthead-nav { display: flex; align-items: center; gap: 4px; }
+.nav-utils { display: flex; align-items: center; }
+.icon-btn.icon-btn.burger { display: none; }   /* wide bars fit every control; see the 720px block */
 /* Two tabs are links and one is a button (the download popup); the reset keeps
    them the same object to the eye. */
 .tab {
@@ -508,10 +510,47 @@ a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-vis
   * { transition: none !important; animation: none !important; }
 }
 
+/* ---------------- Narrow: the nav becomes a drawer ----------------
+   The bar carries five controls, which need ~360px on their own — more than a
+   phone has once the wordmark is paid for. Below 720px they fold behind the
+   burger and drop out of the bar's flow entirely, so nothing can push the page
+   sideways. The panel hangs off .masthead, which is sticky and therefore the
+   containing block for it. */
 @media (max-width: 720px) {
   .masthead-inner, .shell, .colophon-inner { padding-left: 16px; padding-right: 16px; }
   .wordmark-sub { display: none; }
   .shell { padding-top: 24px; }
+
+  .icon-btn.icon-btn.burger { display: grid; }
+  .burger { margin-left: 0; }
+  .icon-bars, .icon-x { display: none; }
+  .burger[aria-expanded="false"] .icon-bars { display: block; }
+  .burger[aria-expanded="true"] .icon-x { display: block; }
+
+  .masthead-nav {
+    display: none;
+    position: absolute; top: 100%; left: 0; right: 0;
+    flex-direction: column; align-items: stretch; gap: 0;
+    padding: 4px 16px 12px;
+    background: var(--sheet); border-bottom: 1px solid var(--line);
+    box-shadow: 0 18px 30px -22px rgba(10, 20, 40, 0.55);
+  }
+  .masthead-nav.is-open { display: flex; }
+
+  /* Stacked, the active tab can't be marked by an underline — the rule under a
+     row now reads as a separator. It gets a bar down its left edge instead. */
+  .masthead-nav .tab {
+    padding: 13px 12px; font-size: 14px; text-align: left;
+    border-bottom: 1px solid var(--hair); border-left: 3px solid transparent;
+  }
+  .masthead-nav .tab[aria-current="page"] {
+    border-bottom-color: var(--hair); border-left-color: var(--mid);
+    background: var(--tint, transparent);
+  }
+
+  .nav-utils { justify-content: space-between; padding: 14px 12px 2px; }
+  .masthead-nav .lang { margin-left: 0; }
+  .nav-utils .icon-btn { margin-left: 0; }
 }
 
 .gate-name small {

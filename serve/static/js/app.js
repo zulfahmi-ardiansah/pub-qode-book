@@ -56,6 +56,38 @@ function initTheme() {
   });
 }
 
+/* ---------------- Nav drawer (narrow screens only) ----------------
+   The panel is a plain block the stylesheet hides above 720px, so this only ever
+   flips one class — no width checks, no measuring. */
+function initNav() {
+  const burger = $("#nav-open");
+  const nav = $("#site-nav");
+  if (!burger || !nav) return;
+
+  const set = (open) => {
+    nav.classList.toggle("is-open", open);
+    burger.setAttribute("aria-expanded", String(open));
+  };
+
+  burger.addEventListener("click", () => set(burger.getAttribute("aria-expanded") !== "true"));
+
+  // A tab either navigates away or opens the download popup; both make the drawer
+  // dead weight. The theme and language controls stay, so you can see what they did.
+  nav.addEventListener("click", (e) => {
+    if (e.target.closest(".tab")) set(false);
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!nav.contains(e.target) && !burger.contains(e.target)) set(false);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") set(false);
+  });
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 720) set(false);
+  });
+}
+
 /* ---------------- Browse: lazy tree + search ---------------- */
 function initBrowse() {
   const page = $("[data-tree-root]");
@@ -371,6 +403,7 @@ function initDownload() {
 }
 
 initTheme();
+initNav();
 initBrowse();
 initClamp();
 initCollapse();

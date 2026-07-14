@@ -22,7 +22,7 @@
     tailwind.config = { darkMode: "class" };
   </script>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}?v=10">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}?v=11">
 
   <!-- The client renders tree rows and list controls, so it needs the same level
        names and strings the server used. One language, one source. -->
@@ -43,22 +43,32 @@
         </span>
       </a>
 
-      <nav class="masthead-nav" aria-label="Sections">
+      <!-- Below 720px the bar has no room for five controls, so the nav collapses
+           into a drawer and this button is the only thing left beside the wordmark. -->
+      <button type="button" class="icon-btn burger" id="nav-open"
+              aria-label="Menu" aria-expanded="false" aria-controls="site-nav">
+        <svg class="icon-bars" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg class="icon-x" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+
+      <nav class="masthead-nav" id="site-nav" aria-label="Sections">
         <a href="/browse/unspsc" class="tab" data-tax="unspsc" {% if name == 'unspsc' %}aria-current="page"{% endif %}>UNSPSC</a>
         <a href="/browse/kbli" class="tab" data-tax="kbli" {% if name == 'kbli' %}aria-current="page"{% endif %}>KBLI</a>
         <button type="button" class="tab" id="download-open" aria-haspopup="dialog" aria-controls="download-modal">{{ t['download'] }}</button>
 
-        <span class="lang" role="group" aria-label="Language">
-          {% for code in langs %}
-          <a href="/lang/{{ code }}" class="lang-opt" {% if code == lang %}aria-current="true"{% endif %}
-             title="{{ t['lang_name'] }}">{{ code | upper }}</a>
-          {% endfor %}
-        </span>
+        <div class="nav-utils">
+          <span class="lang" role="group" aria-label="Language">
+            {% for code in langs %}
+            <a href="/lang/{{ code }}" class="lang-opt" {% if code == lang %}aria-current="true"{% endif %}
+               title="{{ t['lang_name'] }}">{{ code | upper }}</a>
+            {% endfor %}
+          </span>
 
-        <button type="button" id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">
-          <svg class="icon-sun" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path stroke-linecap="round" d="M12 2.6v2.1m0 16.6v-2.1M4.4 4.4l1.5 1.5m12.2 12.2l1.5 1.5M2.6 12h2.1m14.6 0h2.1M4.4 19.6l1.5-1.5M17.6 6.4l1.5-1.5"/></svg>
-          <svg class="icon-moon" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
-        </button>
+          <button type="button" id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">
+            <svg class="icon-sun" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path stroke-linecap="round" d="M12 2.6v2.1m0 16.6v-2.1M4.4 4.4l1.5 1.5m12.2 12.2l1.5 1.5M2.6 12h2.1m14.6 0h2.1M4.4 19.6l1.5-1.5M17.6 6.4l1.5-1.5"/></svg>
+            <svg class="icon-moon" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+          </button>
+        </div>
       </nav>
     </div>
   </header>
@@ -141,6 +151,6 @@
     </div>
   </div>
 
-  <script src="{{ url_for('static', path='js/app.js') }}?v=10"></script>
+  <script src="{{ url_for('static', path='js/app.js') }}?v=11"></script>
 </body>
 </html>
