@@ -1,6 +1,6 @@
 # Qodebook — UNSPSC ↔ KBLI
 
-![Version](https://img.shields.io/badge/version-beta-blue) ![Python](https://img.shields.io/badge/python-3.13+-3776AB?logo=python&logoColor=white) ![FastAPI](https://img.shields.io/badge/fastapi-0.115+-009688?logo=fastapi&logoColor=white) ![SQLite](https://img.shields.io/badge/sqlite-3-003B57?logo=sqlite&logoColor=white)
+![Version](https://img.shields.io/badge/version-alpha-blue) ![Python](https://img.shields.io/badge/python-3.13+-3776AB?logo=python&logoColor=white) ![FastAPI](https://img.shields.io/badge/fastapi-0.115+-009688?logo=fastapi&logoColor=white) ![SQLite](https://img.shields.io/badge/sqlite-3-003B57?logo=sqlite&logoColor=white)
 
 **Qodebook** bridges two code systems that describe different things: what a business **sells** (UNSPSC) and what a business **does** (KBLI).
 
