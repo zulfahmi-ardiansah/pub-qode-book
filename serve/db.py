@@ -10,6 +10,7 @@ not use this module.
 
 import os
 import re
+from functools import lru_cache
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -32,31 +33,34 @@ def _to_pyformat(query: str) -> str:
     return query.replace('?', '%s')
 
 
-class Row(tuple):
-    """A query result row addressable by position (like a tuple) or column
-    name (like a dict) — matches sqlite3.Row so callers using either style
-    (``row['code']``, ``dict(row)``, ``list(row)``) work on both backends."""
+@lru_cache(maxsize=256)
+def _row_class(columns: tuple) -> type:
+    """Build (and cache) a tuple subclass for one column layout.
 
-    __slots__ = ()
-    _columns: tuple = ()
+    tuple is a variable-length builtin, so CPython refuses per-instance
+    __slots__ on subclasses — the column names have to live on the class
+    instead. One class per distinct column tuple, cached and reused for
+    every row of a query, mimics sqlite3.Row: addressable by position (like
+    a tuple) or column name (``row['code']``, ``dict(row)``, ``list(row)``).
+    """
 
-    def __new__(cls, values, columns):
-        row = super().__new__(cls, values)
-        row._columns = columns
-        return row
+    class _Row(tuple):
+        _columns = columns
 
-    def __getitem__(self, key):
-        if isinstance(key, str):
-            return tuple.__getitem__(self, self._columns.index(key))
-        return tuple.__getitem__(self, key)
+        def __getitem__(self, key):
+            if isinstance(key, str):
+                return tuple.__getitem__(self, self._columns.index(key))
+            return tuple.__getitem__(self, key)
 
-    def keys(self):
-        return self._columns
+        def keys(self):
+            return self._columns
+
+    return _Row
 
 
 def _pg_row_factory(cursor):
-    columns = tuple(d.name for d in cursor.description)
-    return lambda values: Row(values, columns)
+    row_class = _row_class(tuple(d.name for d in cursor.description))
+    return lambda values: row_class(values)
 
 
 def _connect_sqlite(readonly: bool):
