@@ -167,7 +167,9 @@ Everything is environment variables, read from `.env` at the project root. Start
 
 | Key | Required | Default | Description |
 |-----|----------|---------|-------------|
-| `SQLITE_PATH` | no | `data/database.sqlite` | Path to the database. Relative paths resolve from the project root |
+| `DATA_MODE` | no | `sqlite` | `sqlite` or `postgres` — which backend `serve/app.py` reads. The mapper always writes SQLite regardless of this setting |
+| `SQLITE_PATH` | no | `data/database.sqlite` | Path to the SQLite database. Relative paths resolve from the project root. Used when `DATA_MODE=sqlite`, and always by the mapper |
+| `DATABASE_URL` | postgres mode only | — | Postgres connection string, e.g. `postgresql://user:password@host:5432/qodebook`. Used when `DATA_MODE=postgres` |
 | `PORT` | no | `8000` | The port the app is served on. Read by `docker compose`. Running uvicorn directly, pass `--port` instead |
 | `LLM_BASE_URL` | no | `https://openrouter.ai/api/v1` | Any OpenAI-compatible endpoint |
 | `LLM_API_KEY` | mapper only | — | API key for that endpoint |
@@ -176,6 +178,12 @@ Everything is environment variables, read from `.env` at the project root. Start
 | `LLM_BUDGET_USD` | no | — | Spend cap. Empty or `0` disables the guard |
 | `LLM_INPUT_PRICE` | no | — | USD per 1,000,000 input tokens |
 | `LLM_OUTPUT_PRICE` | no | — | USD per 1,000,000 output tokens |
+
+### Postgres mode
+
+Set `DATA_MODE=postgres` and `DATABASE_URL` to point `serve/app.py` at a Postgres database instead of the bundled SQLite file. This is serve-only — `process/mapper.py` always writes SQLite — so a Postgres target needs its schema and data loaded separately: `data/structure.sql` and the `data/dump_*.sql` files are already Postgres-compatible DDL/inserts, so `psql $DATABASE_URL < data/structure.sql` followed by the dumps populates it.
+
+For local testing, `docker compose --profile postgres up` starts a throwaway Postgres container alongside the app; point `DATABASE_URL` at `postgresql://qodebook:qodebook@postgres:5432/qodebook` in that case.
 
 ### The budget guard
 

@@ -5,12 +5,31 @@ services:
     container_name: qodebook
     environment:
       PORT: ${PORT:-8000}
+      DATA_MODE: ${DATA_MODE:-sqlite}
       SQLITE_PATH: data/database.sqlite
+      DATABASE_URL: ${DATABASE_URL:-}
     ports:
       - "${PORT:-8000}:${PORT:-8000}"
     volumes:
       - qodebook_data:/app/data/
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: qodebook-postgres
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_USER: qodebook
+      POSTGRES_PASSWORD: qodebook
+      POSTGRES_DB: qodebook
+    ports:
+      - "5432:5432"
+    volumes:
+      - qodebook_pgdata:/var/lib/postgresql/data
     restart: unless-stopped
 
 volumes:
   qodebook_data:
+  qodebook_pgdata:

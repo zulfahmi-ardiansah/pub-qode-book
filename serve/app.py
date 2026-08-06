@@ -18,7 +18,6 @@ KBLI ("Kelompok"), which would otherwise mix two languages on one screen.
 import csv
 import io
 import os
-import sqlite3
 from functools import lru_cache, partial
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -34,14 +33,16 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 from starlette.background import BackgroundTask
 
+from . import db
+
 SERVE_DIR = Path(__file__).resolve().parent
 ROOT_DIR = SERVE_DIR.parent
 
 load_dotenv(ROOT_DIR / '.env')
 
-# Relative SQLITE_PATH is read from the project root, so the app runs the same
-# whatever directory uvicorn was started in.
-SQLITE_PATH = ROOT_DIR / os.getenv('SQLITE_PATH', 'data/database.sqlite')
+# LIKE is case-insensitive in SQLite by default but not in Postgres, so search
+# uses ILIKE there to keep results consistent across backends.
+LIKE_OP = 'ILIKE' if db.DATA_MODE == 'postgres' else 'LIKE'
 
 LANGS = ('en', 'id')
 DEFAULT_LANG = 'en'
@@ -389,14 +390,12 @@ def set_lang(code: str, request: Request):
 
 # --------------------------------------------------------------------------- db
 
-def connect() -> sqlite3.Connection:
+def connect():
     """Open the database read-only, so no request can mutate what mapper.py built."""
-    if not SQLITE_PATH.exists():
-        raise HTTPException(500, f'Database not found at {SQLITE_PATH}')
-    conn = sqlite3.connect(f'file:{SQLITE_PATH.as_posix()}?mode=ro', uri=True)
-    conn.row_factory = sqlite3.Row
-    conn.execute('PRAGMA query_only = 1')
-    return conn
+    try:
+        return db.connect(readonly=True)
+    except (FileNotFoundError, RuntimeError) as e:
+        raise HTTPException(500, str(e))
 
 
 @lru_cache(maxsize=1)
@@ -669,7 +668,7 @@ def search(name: str, q: str = ''):
         return {'rows': [], 'total': 0}
 
     params = {'like': f'%{q}%'}
-    where = '(code LIKE :like OR title LIKE :like OR definition LIKE :like)'
+    where = f'(code {LIKE_OP} :like OR title {LIKE_OP} :like OR definition {LIKE_OP} :like)'
     with connect() as conn:
         total = conn.execute(f'SELECT COUNT(*) FROM {ds["table"]} WHERE {where}', params).fetchone()[0]
         rows = rows_to_dicts(conn.execute(
@@ -708,7 +707,7 @@ def _mappings(conn, name: str, node: dict, lang: str) -> dict:
 
     if name == 'kbli' and 1 <= level < ds['map_level']:
         rolled = rows_to_dicts(conn.execute(
-            select + f'WHERE m.{ds["map_column"]} LIKE ? ORDER BY p.code', (f'{code}%',)
+            select + f'WHERE m.{ds["map_column"]} {LIKE_OP} ? ORDER BY p.code', (f'{code}%',)
         ))
         note = STRINGS[lang]['rolled_up'].format(code=code) if rolled else None
         return {'items': rolled, 'note': note}
