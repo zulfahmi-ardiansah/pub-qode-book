@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Why business activity codes and purchasing codes need a connection. Qodebook is a reader and experimental mapping between KBLI and UNSPSC.">
+  <title>Qodebook · Between business and buying</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='24' fill='%23005db5'/%3E%3Crect y='24' width='32' height='8' fill='%239b1c31'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    try { const choice = localStorage.getItem('qodebook-site-theme'); document.documentElement.dataset.theme = choice === 'light' || choice === 'dark' ? choice : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch (_) {}
+  </script>
+  <style>
+    :root { color-scheme: light; --paper:#f2eee5; --sheet:#fbf8f1; --ink:#182536; --muted:#505c69; --line:#c9c6bc; --blue:#005db5; --red:#9b1c31; --blue-soft:#dde8f1; --red-soft:#eedde0; --focus:#935000; }
+    :root[data-theme="dark"] { color-scheme:dark; --paper:#141c27; --sheet:#1b2635; --ink:#edf0f3; --muted:#b6c2d0; --line:#536274; --blue:#95caff; --red:#f4acb9; --blue-soft:#213950; --red-soft:#462a35; --focus:#ffce7c; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; scroll-padding-top:85px; }
+    body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.65 'IBM Plex Sans',system-ui,sans-serif; }
+    h1,h2,h3,h4,p,figure { margin:0; }
+    h1,h2 { font-family:'IBM Plex Serif',Georgia,serif; font-weight:400; }
+    h3,h4 { font-family:'IBM Plex Sans Condensed','Arial Narrow',sans-serif; }
+    a { color:inherit; text-underline-offset:4px; }
+    a:hover { text-decoration-thickness:2px; }
+    button,select { font:inherit; }
+    button { cursor:pointer; }
+    a:focus-visible,button:focus-visible,summary:focus-visible { outline:3px solid var(--focus); outline-offset:5px; }
+    svg { flex:none; }
+    code,pre,.code { font-family:'IBM Plex Mono',ui-monospace,monospace; }
+    .container { width:min(100% - 64px,1240px); margin-inline:auto; }
+    .skip { position:fixed; top:-100px; left:12px; z-index:100; background:var(--sheet); padding:10px 15px; }
+    .skip:focus { top:10px; }
+    .label { font-size:12px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; }
+    .nav-shell { position:sticky; top:0; z-index:40; background:var(--paper); border-bottom:1px solid var(--line); }
+    .nav-inner { display:flex; align-items:center; justify-content:space-between; gap:20px; min-height:72px; }
+    .brand { display:inline-flex; align-items:center; gap:10px; min-height:44px; text-decoration:none; font:700 24px 'IBM Plex Sans Condensed',sans-serif; }
+    .brand-mark { width:10px; height:28px; background:linear-gradient(#005db5 50%,#9b1c31 50%); }
+    .nav-right,.nav-links { display:flex; align-items:center; gap:24px; }
+    .nav-links a { display:flex; align-items:center; min-height:44px; font-size:14px; font-weight:500; text-decoration:none; }
+    .nav-links a:hover { color:var(--blue); }
+    .utility { height:44px; min-width:44px; border:1px solid var(--line); color:var(--ink); background:transparent; display:inline-flex; justify-content:center; align-items:center; gap:8px; }
+    .utility:hover { background:var(--sheet); }
+    .utility svg { width:19px; height:19px; }
+    .menu-button { display:none; padding:0 12px; }
+    .theme-button .moon { display:none; }
+    [data-theme="dark"] .theme-button .sun { display:none; }
+    [data-theme="dark"] .theme-button .moon { display:block; }
+
+    /* The cover makes the two vocabularies visible before introducing the software. */
+    .cover { background:#182536; color:#fff5e7; --focus:#ffce7c; }
+    .cover-body { padding:45px 0 40px; text-align:center; }
+    .cover-topline { display:flex; justify-content:space-between; gap:16px; color:#cbe1f5; font-size:12px; margin-bottom:28px; }
+    .cover h1 { font-size:clamp(2.8rem,6.8vw,6.2rem); letter-spacing:-.052em; line-height:1.07; }
+    .cover h1 em { font-weight:400; }
+    .cover-lead { max-width:66ch; font-size:clamp(1rem,1.5vw,1.2rem); color:#e1ecf7; margin:25px auto 24px; }
+    .actions { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; }
+    .action { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:48px; padding:10px 19px; font-size:14px; font-weight:600; text-decoration:none; border:1px solid currentColor; }
+    .action svg { width:18px; height:18px; }
+    .action.primary { background:#fff5e7; color:#07375f; border-color:#fff5e7; }
+    .action:hover { background:#d7e9fa; color:#12314d; border-color:#d7e9fa; }
+    .cover-map { display:grid; grid-template-columns:1fr 170px 1fr; align-items:stretch; border-top:1px solid #6d9ec9; margin-top:38px; text-align:left; }
+    .cover-side { padding:23px 0 7px; }
+    .cover-side:last-child { text-align:right; }
+    .cover-acronym { display:block; font:600 clamp(2.8rem,6vw,5.6rem)/1.1 'IBM Plex Sans Condensed',sans-serif; letter-spacing:-.02em; }
+    .cover-side p { color:#d5e5f5; font-size:14px; }
+    .cover-link { display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px; padding-top:20px; }
+    .cover-link svg { width:120px; height:24px; }
+    .cover-link span { font-size:12px; color:#d5e5f5; }
+
+    .chapter { padding:82px 0; }
+    .chapter-heading { display:grid; grid-template-columns:90px 1fr; gap:24px; align-items:start; margin-bottom:40px; }
+    .chapter-number { color:var(--blue); font:400 42px/1.2 'IBM Plex Serif',Georgia,serif; }
+    .chapter-heading h2 { font-size:clamp(2.2rem,4.5vw,3.8rem); letter-spacing:-.035em; line-height:1.13; }
+    .chapter-heading p { color:var(--muted); margin-top:16px; }
+    .codebooks { display:grid; grid-template-columns:1fr 1fr; border-block:1px solid var(--line); }
+    .codebook { padding:32px 42px 30px 0; }
+    .codebook + .codebook { padding:32px 0 30px 42px; border-left:1px solid var(--line); }
+    .codebook.kbli { --tax:var(--red); }
+    .codebook.unspsc { --tax:var(--blue); }
+    .codebook .label { color:var(--tax); }
+    .codebook h3 { color:var(--tax); font-size:clamp(3.6rem,6vw,5.7rem); letter-spacing:-.035em; line-height:1.1; margin:8px 0; }
+    .codebook .full-name { min-height:3em; font-size:13px; color:var(--muted); }
+    .codebook h4 { font-size:1.65rem; line-height:1.2; margin:25px 0 13px; }
+    .codebook p + p { margin-top:13px; }
+    .codebook .practical { padding-top:22px; margin-top:26px; border-top:2px solid var(--tax); }
+    .practical span { display:block; color:var(--muted); font-size:12px; margin-bottom:6px; }
+    .practical strong { font-size:15px; font-weight:600; }
+    .comparison-note { margin-top:25px; color:var(--muted); font-size:15px; }
+
+    .origin { background:#182536; color:#fff2e7; padding:75px 0 82px; --focus:#ffce7c; }
+    .origin-layout { display:grid; grid-template-columns:1.16fr 1fr; gap:clamp(32px,6vw,88px); }
+    .origin .label { color:#f3c9cc; margin-bottom:22px; }
+    .origin h2 { font-size:clamp(2.2rem,4vw,3.5rem); line-height:1.2; letter-spacing:-.025em; }
+    .origin h2 em { color:#ffc6ae; }
+    .origin-story { padding-top:40px; }
+    .origin-story p { color:#f9dfe1; margin-bottom:18px; }
+    .origin-story strong { color:#fff5ed; }
+    .origin-source { font-size:12px; padding-top:13px; border-top:1px solid #c98191; }
+
+    .sample-section { background:var(--sheet); }
+    .sample-controls { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; }
+    .sample-controls[hidden] { display:none; }
+    .sample-choice { display:flex; align-items:center; gap:9px; padding:10px 15px; min-height:46px; background:transparent; border:1px solid var(--line); color:var(--ink); font-size:14px; }
+    .sample-choice svg { width:18px; height:18px; }
+    .sample-choice[aria-pressed="true"] { background:var(--ink); border-color:var(--ink); color:var(--sheet); }
+    .sample-choice:hover { border-color:var(--blue); }
+    .sample { display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); border:1px solid var(--line); }
+    .sample-input { background:var(--red-soft); padding:32px; }
+    .sample-input .label { color:var(--red); }
+    .sample-input code { display:block; font-size:clamp(2.7rem,5vw,4.5rem); line-height:1.2; color:var(--red); margin:28px 0 10px; letter-spacing:-.04em; }
+    .sample-input h3 { font-size:1.8rem; line-height:1.2; }
+    .sample-input p { font-size:14px; color:var(--muted); margin-top:10px; }
+    .sample-output { padding:32px; background:var(--blue-soft); }
+    .sample-output .label { color:var(--blue); }
+    .output-list { list-style:none; padding:0; margin:24px 0 0; }
+    .output-list li { display:grid; grid-template-columns:110px 1fr; gap:15px; border-top:1px solid var(--line); padding:18px 0; }
+    .output-list li:first-child { border-top:0; padding-top:0; }
+    .output-list code { color:var(--blue); font-size:15px; }
+    .output-list strong { font-size:16px; line-height:1.4; font-weight:500; }
+    .sample-caption { padding:16px 0; font-size:13px; color:var(--muted); }
+    .sample-caption a { color:var(--blue); }
+    .disclosure { border-top:1px solid var(--line); }
+    .disclosure:last-child { border-bottom:1px solid var(--line); }
+    .disclosure summary { cursor:pointer; min-height:56px; padding:15px 4px; font-weight:600; }
+    .disclosure p { padding:0 4px 20px; color:var(--muted); }
+    .disclosure summary::marker { color:var(--blue); }
+
+    .use-section { background:var(--paper); }
+    .use-layout { display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); gap:clamp(35px,6vw,85px); }
+    .use-intro h2 { font-size:clamp(2.5rem,4.5vw,3.9rem); line-height:1.1; letter-spacing:-.035em; margin:17px 0 24px; }
+    .use-intro > p { color:var(--muted); }
+    .reader-features { list-style:none; padding:0; margin:30px 0 0; }
+    .reader-features li { border-top:1px solid var(--line); padding:16px 0; }
+    .reader-features strong { display:block; font:600 1.25rem 'IBM Plex Sans Condensed',sans-serif; margin-bottom:5px; }
+    .reader-features span { color:var(--muted); font-size:14px; }
+    .setup { border-top:4px solid var(--blue); padding-top:25px; }
+    .setup h3 { font-size:1.65rem; margin-bottom:12px; }
+    .setup p { color:var(--muted); margin-bottom:15px; }
+    pre { background:var(--ink); color:var(--paper); padding:21px; white-space:pre-wrap; overflow-wrap:anywhere; font-size:13px; line-height:1.7; margin:20px 0; }
+    .setup a { color:var(--blue); }
+    .setup .disclosure p { margin:0; }
+    .setup .disclosure pre { margin-top:0; }
+    .footer { background:#182536; color:#e4e8ec; --focus:#ffce7c; padding:28px 0; }
+    .footer .container { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:15px; }
+    .footer-brand { font:700 23px 'IBM Plex Sans Condensed',sans-serif; margin-bottom: 10px; }
+    .footer p { color:#bac8d6; font-size:13px; }
+    .footer a { font-size:14px; }
+    .reveal { opacity:1; }
+    @media(prefers-reduced-motion:no-preference) { .entering { animation:chapter-enter .55s ease both; } @keyframes chapter-enter { from { transform:translateY(15px); opacity:.3; } to { transform:none; opacity:1; } } }
+    @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } *,*::before,*::after { animation:none!important; transition:none!important; } }
+    @media(max-width:950px) { .nav-right,.nav-links { gap:15px; } .container { width:min(100% - 40px,1240px); } .origin-layout { gap:35px; } .chapter-heading { grid-template-columns:65px 1fr; gap:16px; } .codebook { padding-right:25px; } .codebook + .codebook { padding-left:25px; } }
+    @media(max-width:760px) {
+      .nav-inner { min-height:62px; } .brand { font-size:22px; } .nav-right { gap:8px; }
+      .menu-button { display:inline-flex; }
+      .nav-links { display:none; position:absolute; top:100%; left:0; right:0; padding:8px 20px 16px; background:var(--paper); border-bottom:1px solid var(--line); }
+      .nav-links[data-open="true"] { display:flex; flex-direction:column; align-items:stretch; gap:0; }
+      .nav-links a { padding:7px; }
+      .cover-body { padding-top:30px; } .cover-topline { font-size:11px; margin-bottom:25px; }
+      .cover-map { grid-template-columns:1fr 80px 1fr; } .cover-link svg { width:65px; }
+      .cover-side p { font-size:12px; } .cover-acronym { font-size:clamp(2.3rem,7vw,3.4rem); }
+      .chapter { padding:58px 0; } .chapter-heading { grid-template-columns:1fr; gap:13px; margin-bottom:29px; }
+      .chapter-number { font-size:24px; } .chapter-heading h2 { font-size:clamp(2.1rem,6vw,2.8rem); }
+      .origin-layout,.use-layout { grid-template-columns:1fr; gap:28px; } .origin { padding:58px 0; } .origin-story { padding-top:0; }
+      .sample { grid-template-columns:1fr; } .sample-input,.sample-output { padding:26px; }
+      .sample-input code { margin-top:18px; } .sample-input h3 { font-size:1.5rem; }
+    }
+    @media(max-width:540px) {
+      .container { width:calc(100% - 32px); } .cover-topline span:last-child { display:none; }
+      .cover h1 { font-size:clamp(2.6rem,10vw,3.6rem); } .cover h1 br { display:none; }
+      .cover-lead { margin-top:20px; } .actions { flex-direction:column; align-items:stretch; }
+      .cover-map { grid-template-columns:1fr 55px 1fr; margin-top:28px; } .cover-link svg { width:45px; } .cover-link span { font-size:10px; }
+      .cover-acronym { font-size:2.3rem; } .cover-side p { max-width:17ch; } .cover-side:last-child p { margin-left:auto; }
+      .codebooks { grid-template-columns:1fr; } .codebook,.codebook + .codebook { padding:28px 0; border-left:0; } .codebook + .codebook { border-top:1px solid var(--line); }
+      .codebook .full-name { min-height:0; } .codebook h3 { font-size:4.2rem; }
+      .sample-choice { flex:1 1 auto; } .output-list li { grid-template-columns:1fr; gap:4px; }
+      .sample-input,.sample-output { padding:22px; } .setup pre { padding:16px; }
+    }
+    @media scripting:none { .theme-button,.menu-button { display:none; } @media(max-width:760px) { .nav-inner { flex-wrap:wrap; padding-block:8px; } .nav-links { position:static; display:flex; flex-wrap:wrap; border:0; padding:0; gap:10px; } } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to Content</a>
+  <header class="nav-shell"><div class="container nav-inner">
+    <a href="#top" class="brand"><span class="brand-mark" aria-hidden="true"></span>Qodebook</a>
+    <div class="nav-right">
+      <nav class="nav-links" id="site-nav" aria-label="Main navigation"><a href="#codebooks">The Two Codes</a><a href="#motivation">Why It Exists</a><a href="#example">Try a Connection</a><a href="#run">Run Qodebook</a></nav>
+      <button class="utility theme-button" type="button" aria-label="Switch to dark theme" aria-pressed="false"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M19 5l-1.5 1.5m-11 11L5 19"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20.5 14.2A8.8 8.8 0 0 1 9.8 3.5 8.9 8.9 0 1 0 20.5 14.2Z"/></svg></button>
+      <button class="utility menu-button" type="button" aria-expanded="false" aria-controls="site-nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>Menu</button>
+    </div>
+  </div></header>
+  <main id="main">
+    <section class="cover" id="top" aria-labelledby="page-title"><div class="container cover-body">
+      <div class="cover-topline"><span>A field guide to Qodebook</span><span>Business activity ↔ Products &amp; services</span></div>
+      <h1 id="page-title">What a business does. <br><em>What it might supply.</em></h1>
+      <p class="cover-lead">A company’s activity code and a buyer’s product code describe different things. Qodebook connects KBLI and UNSPSC, so you can investigate the relationship between a business activity and the goods or services it may produce.</p>
+      <div class="actions"><a class="action primary" href="#example"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg>Try a Connection</a><a class="action" href="https://github.com/zulfahmi-ardiansah/pub-qode-book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m8 5-6 7 6 7m8-14 6 7-6 7M14 3l-4 18"/></svg>View the Repository</a></div>
+      <div class="cover-map" aria-label="Qodebook links KBLI business activities to UNSPSC product categories"><div class="cover-side"><span class="cover-acronym">KBLI</span><p>Classifies the business activity</p></div><div class="cover-link"><svg viewBox="0 0 120 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M1 12h116m-9-8 9 8-9 8M10 4l-9 8 9 8"/></svg><span>Qodebook</span></div><div class="cover-side"><span class="cover-acronym">UNSPSC</span><p>Classifies the goods or services</p></div></div>
+    </div></section>
+
+    <section class="chapter" id="codebooks"><div class="container reveal">
+      <div class="chapter-heading"><span class="chapter-number" aria-hidden="true">01</span><div><h2>Why do we need two codebooks?</h2><p>A company registration and a purchase order answer different questions. Codes help people organise and compare each kind of record, even when businesses use different names or descriptions.</p></div></div>
+      <div class="codebooks">
+        <article class="codebook kbli"><p class="label">For business activity</p><h3>KBLI</h3><p class="full-name">Klasifikasi Baku Lapangan Usaha Indonesia<br>Indonesia’s business activity classification</p><h4>What work does this business do?</h4><p>KBLI provides common categories for activities such as farming, printing, and construction. Indonesia uses these categories in business registration and economic statistics, so similar activities can be recorded consistently.</p><p>For someone looking at a business record, the code helps identify its line of work. It does not give you that company’s product catalogue.</p><div class="practical"><span>Example of an activity</span><strong><code>01111</code> · Pertanian Jagung (corn farming)</strong></div></article>
+        <article class="codebook unspsc"><p class="label">For purchasing</p><h3>UNSPSC</h3><p class="full-name">United Nations Standard Products and Services Code<br>A classification of goods and services</p><h4>What is being bought or sold?</h4><p>UNSPSC gives buyers and suppliers a common way to classify catalogue items and purchases. Procurement teams can group similar spending and compare categories across suppliers instead of relying only on free-text item names.</p><p>For someone looking at a purchase, the code helps identify the kind of good or service. It does not tell you the supplier’s registered business activity.</p><div class="practical"><span>Example of a product family</span><strong><code>50220000</code> · Cereal and pulse products</strong></div></article>
+      </div>
+      <p class="comparison-note">Working with both records means crossing from an activity to a product category. Neither codebook supplies that connection on its own.</p>
+    </div></section>
+
+    <section class="origin" id="motivation"><div class="container origin-layout reveal">
+      <div><p class="label">The reason for Qodebook</p><h2>A company is registered under KBLI 01111.<br><em>What would it actually be selling?</em></h2></div>
+      <div class="origin-story"><p>That is the practical question behind this project. The two classifications were made for different purposes. Looking up a business activity still leaves you with the work of finding plausible goods or services on the purchasing side.</p><p><strong>Matching them by hand is a large job.</strong> The repository includes 158,473 UNSPSC entries and 2,444 KBLI entries. Qodebook uses a language model to propose connections, saves the results, and gives people a way to inspect them.</p><p>The aim is to make the comparison possible to investigate: read the definitions, follow the hierarchy, and decide whether a proposed link is useful for your case.</p><p class="origin-source">Motivation and catalogue sizes are documented in the <a href="https://github.com/zulfahmi-ardiansah/pub-qode-book#readme">project README</a>. The counts describe the included data, not mapping accuracy.</p></div>
+    </div></section>
+
+    <section class="chapter sample-section" id="example"><div class="container reveal">
+      <div class="chapter-heading"><span class="chapter-number" aria-hidden="true">02</span><div><h2>Follow a real connection.</h2><p>Start with a business activity and see the product families saved for it. These examples come directly from the bundled database.</p></div></div>
+      <div class="sample-controls" hidden role="group" aria-label="Choose a stored example">
+        <button class="sample-choice" type="button" data-example="01111" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 5h7l2 3h9v12H3Z"/></svg>Corn Farming</button>
+        <button class="sample-choice" type="button" data-example="18111" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 5h7l2 3h9v12H3Z"/></svg>General Printing</button>
+        <button class="sample-choice" type="button" data-example="41011" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 5h7l2 3h9v12H3Z"/></svg>Home Construction</button>
+      </div>
+      <div class="sample"><div class="sample-input"><span class="label">KBLI / Activity · Kelompok</span><code id="activity-code">01111</code><h3 id="activity-title">Pertanian Jagung</h3><p id="activity-english">Corn farming</p></div><div class="sample-output"><span class="label">UNSPSC / Proposed product families</span><ul class="output-list" id="family-list"><li><code>10150000</code><strong>Seeds and bulbs and seedlings and cuttings</strong></li><li><code>50220000</code><strong>Cereal and pulse products</strong></li></ul></div></div>
+      <p class="sample-caption"><span id="sample-status" role="status">Showing the 2 stored links for corn farming.</span> This is a small set of examples, not the searchable app.</p>
+      <details class="disclosure"><summary>What does a proposed link mean?</summary><p>The mapping directly joins a five-digit KBLI activity (<em>kelompok</em>) to a UNSPSC <em>family</em>. It suggests a relationship to review. It does not prove that a particular company sells those goods or that every item in the family fits. The links are machine-generated, not an official correspondence table; some may be wrong.</p></details>
+      <details class="disclosure"><summary>How are the links made?</summary><p>The mapper reads the activity with its parent hierarchy, then narrows UNSPSC choices through segment groups, segments, and families. A final filter keeps a family only if it can name a specific output the activity delivers. The reader labels links inherited from a family or collected from child activities. <a href="https://github.com/zulfahmi-ardiansah/pub-qode-book#how-it-works">Read about the mapping process</a>.</p></details>
+    </div></section>
+
+    <section class="chapter use-section" id="run"><div class="container use-layout reveal">
+      <div class="use-intro"><p class="label">Put the codebooks to work</p><h2>Read the data.<br>Check the connection.</h2><p>The browser reader ships with its database. Run it locally to search both classifications and inspect the full set of stored links.</p><ul class="reader-features"><li><strong>Search in English or Indonesian</strong><span>Look up a code, title, or definition and browse the hierarchy.</span></li><li><strong>Understand the context</strong><span>Read a code’s definition, parent, siblings, children, and links to the other classification.</span></li><li><strong>Use the data elsewhere</strong><span>Export either codebook or the mapping as CSV or XLSX from the running app.</span></li></ul></div>
+      <div class="setup"><h3>Start the browser reader</h3><p>Docker includes Python, the app, and the database. From your terminal:</p><pre><code>git clone https://github.com/zulfahmi-ardiansah/pub-qode-book.git
+cd pub-qode-book
+docker compose up --build</code></pre><p>Then open <strong>http://localhost:8000</strong> in your browser. An LLM API key is only needed if you run the mapper.</p>
+        <details class="disclosure"><summary>Run with Python instead</summary><p>Use Python 3.13+ in your preferred environment. From the cloned repository:</p><pre><code>python -m pip install -r requirements.txt
+uvicorn serve.app:app --reload</code></pre><p>Open <strong>http://127.0.0.1:8000</strong>. The committed SQLite database is ready to read.</p></details>
+        <details class="disclosure"><summary>Run the CLI mapper</summary><p>Install the Python dependencies above. Copy <code>.env.example</code> to <code>.env</code>, set <code>LLM_API_KEY</code>, and configure an OpenAI-compatible endpoint and model. Then run:</p><pre><code>python process/mapper.py</code></pre><p>The mapper writes SQLite and skips activities that already have saved links. See the <a href="https://github.com/zulfahmi-ardiansah/pub-qode-book#configuration">configuration and budget settings</a> before generating new mappings.</p></details>
+        <p style="margin-top:22px">Continue with the <a href="https://github.com/zulfahmi-ardiansah/pub-qode-book/blob/main/README.md">README</a> or the <a href="https://github.com/zulfahmi-ardiansah/pub-qode-book/blob/main/DEFINITION.md">code definitions</a>.</p>
+      </div>
+    </div></section>
+  </main>
+  <footer class="footer"><div class="container"><div><span class="footer-brand">Qodebook</span><p>UNSPSC ↔ KBLI · A project by xxdev.id</p></div><a href="https://github.com/zulfahmi-ardiansah/pub-qode-book">Source on GitHub</a></div></footer>
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const theme = document.querySelector('.theme-button');
+      const menu = document.querySelector('.menu-button');
+      const nav = document.querySelector('#site-nav');
+      function syncTheme() { const dark = root.dataset.theme === 'dark'; theme.setAttribute('aria-pressed', String(dark)); theme.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme'); }
+      syncTheme();
+      theme.addEventListener('click', () => { root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark'; try { localStorage.setItem('qodebook-site-theme', root.dataset.theme); } catch (_) {} syncTheme(); });
+      function closeMenu(restore = false) { nav.dataset.open = 'false'; menu.setAttribute('aria-expanded', 'false'); if (restore) menu.focus(); }
+      menu.addEventListener('click', () => { const open = menu.getAttribute('aria-expanded') === 'true'; nav.dataset.open = String(!open); menu.setAttribute('aria-expanded', String(!open)); if (!open) nav.querySelector('a').focus(); });
+      nav.addEventListener('click', event => { if (event.target.closest('a')) closeMenu(); });
+      document.addEventListener('keydown', event => { if (event.key === 'Escape' && menu.getAttribute('aria-expanded') === 'true') closeMenu(true); });
+      document.addEventListener('click', event => { if (!event.target.closest('.nav-right')) closeMenu(); });
+      matchMedia('(min-width:761px)').addEventListener('change', event => { if (event.matches) closeMenu(); });
+
+      // These complete example sets are copied from data/database.sqlite, map_view.
+      const examples = {
+        '01111': { title:'Pertanian Jagung', english:'Corn farming', families:[['10150000','Seeds and bulbs and seedlings and cuttings'],['50220000','Cereal and pulse products']] },
+        '18111': { title:'Pencetakan Umum', english:'General printing', families:[['55100000','Printed media'],['55120000','Signage and accessories'],['82120000','Reproduction services']] },
+        '41011': { title:'Konstruksi Konvensional Gedung Hunian', english:'Residential building construction', families:[['72110000','Residential building construction services'],['95120000','Permanent buildings and structures']] }
+      };
+      const controls = document.querySelector('.sample-controls');
+      controls.hidden = false;
+      controls.addEventListener('click', event => {
+        const button = event.target.closest('[data-example]');
+        if (!button) return;
+        const code = button.dataset.example, example = examples[code];
+        if (!example) return;
+        document.querySelector('#activity-code').textContent = code;
+        document.querySelector('#activity-title').textContent = example.title;
+        document.querySelector('#activity-english').textContent = example.english;
+        const rows = example.families.map(([familyCode, title]) => { const row = document.createElement('li'), number = document.createElement('code'), name = document.createElement('strong'); number.textContent = familyCode; name.textContent = title; row.append(number,name); return row; });
+        document.querySelector('#family-list').replaceChildren(...rows);
+        controls.querySelectorAll('button').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+        document.querySelector('#sample-status').textContent = 'Showing the ' + rows.length + ' stored links for ' + example.english.toLowerCase() + '.';
+      });
+      // Visibility never depends on animation or a remote library.
+      if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('entering'); observer.unobserve(entry.target); } }), { threshold:.08 });
+        document.querySelectorAll('.reveal').forEach(section => observer.observe(section));
+      }
+    })();
+  </script>
+</body>
+</html>
